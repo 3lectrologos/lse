@@ -52,23 +52,6 @@ classdef Model < handleplus
                             self.train.x, self.train.y, testx);
     end
     
-    % Conditional mutual info between GP and testx given the existing
-    % training points
-    function mi = mutual_info(self, testx)
-      if ~iscell(self.hyp.fun.cov)
-        self.hyp.fun.cov = {self.hyp.fun.cov};
-      end
-      Kbb = feval(self.hyp.fun.cov{:}, self.hyp.val.cov, testx);
-      Kab = feval(self.hyp.fun.cov{:}, self.hyp.val.cov, self.train.x,...
-                  testx);
-      Kaa = feval(self.hyp.fun.cov{:}, self.hyp.val.cov, self.train.x);
-      sn2 = exp(2*self.hyp.val.lik);
-      na = length(Kaa);
-      S = Kbb - Kab'*((Kaa + sn2*eye(na))\Kab);
-      ns = length(S);
-      mi = 0.5*logdet(eye(ns) + sn2^(-1)*S);
-    end
-    
     % GP model inference on grid
     function [my, vy, mf, vf] = inf_grid(self, x1, x2)
       n = length(x1);
@@ -78,11 +61,6 @@ classdef Model < handleplus
       vy = reshape(vry, n, n);
       mf = reshape(mrf, n, n);
       vf = reshape(vrf, n, n);
-    end
-    
-    % Update model hyperparameters
-    function update_hyp(self)
-      self.hyp.update(self.train.x, self.train.y);
     end
   end
 end
